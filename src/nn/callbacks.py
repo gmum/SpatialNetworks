@@ -49,33 +49,3 @@ class SaveBest:
             self._best = metric
             print_verbose(f"New best model, saving at: {self.path}", self.verbose)
             torch.save(self.model, self.path)
-
-
-# class ResetDataset:
-#     """Reset dataset's state.
-
-#     torch.utils.data.Dataset cannot obtain other item than `int` as index,
-#     hence samplers and datasets had to be merged.
-
-
-#     Parameters
-#     ----------
-#     *datasets: torch.utils.data.Dataset
-#             Train and validation datasets
-#     model: torch.nn.Module
-#             Module to save
-#     operator : typing.Callable[float, float]
-#             Function comparing two values - current metric and best metric so far.
-#             If true, save new model. One can user Python's standard operator library
-#             for this argument.
-#     verbose: bool
-#             If true, print to stdout informations about saving the model.
-
-#     """
-
-#     def __init__(*datasets):
-#         self.datasets = datasets
-
-#     def __call__(self):
-#         for dataset in self.datasets:
-#             dataset.reset()

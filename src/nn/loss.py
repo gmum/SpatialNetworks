@@ -7,12 +7,38 @@ from .layers import _SpatialConv, _SpatialLinear
 
 
 def get(args, model):
+    """Based on user input return either spatial cross entropy or regular one.
+
+    SpatialCrossEntropyLoss has additional `transport` and `proximity` constrains;
+    see original paper for explanation.
+
+    Parameters
+    ----------
+    args: argparse.Namespace
+            argparse.ArgumentParser().parse() return value. User provided arguments.
+    model: torch.nn.Module
+            Model whose parameters will be, possibly, used by `transport` and
+            `proximity` loss
+
+    Returns
+    -------
+    typing.Callable
+            Loss object (or criterion)
+
+    """
     if hasattr(args, "where") and args.where is not None:
         return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm)
     return CustomCrossEntropyLoss()
 
 
 class CustomCrossEntropyLoss:
+    """Normal CrossEntropyLoss, but reshapes neural net output appropriately.
+
+    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`.
+
+    """
+
     def __call__(self, y_pred, y_true):
         # Has to be reshaped for concatenated outputs case
         if len(y_true.shape) > 1:
@@ -22,6 +48,24 @@ class CustomCrossEntropyLoss:
 
 
 class SpatialCrossEntropyLoss:
+    """Normal CrossEntropyLoss, but reshapes neural net output appropriately.
+
+    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`.
+
+    Parameters
+    ----------
+    module: torch.nn.Module
+            Module whose weights will be constrained by proximity and transport loss.
+    proximity: float
+            Proximity hyperparameter
+    transport: float
+            Transport hyperparameter
+    norm: str
+            Either "l1" or "l2" (case insensitive), representing LP norm to be used.
+
+    """
+
     def __init__(self, module, proximity, transport, norm):
         self.module = module
         self.proximity = Proximity(proximity)
@@ -39,6 +83,25 @@ class SpatialCrossEntropyLoss:
 
 @dataclasses.dataclass
 class Proximity:
+    """Regularization term discouraging spatial neurons within layer from being too close.
+
+    Like in biological network, neurons have some physical dimensions, hence
+    they cannot be "too close".
+
+    Parameters
+    ----------
+    alpha: float
+            Hyperparameter regarding strength of proximity penalty. The higher,
+            the more penalty is incurred upon network for grouping neurons together.
+    epsilon: float, optional
+            Small non-zero value in rare case distance is too small to
+            have `sqrt` taken from it.
+    spatial_types: Tuple[type]
+            Tuple containing types to be considered spatial.
+            Default: (SpatialLinear, SpatialConv)
+
+    """
+
     alpha: float
     epsilon: float = 1e-8
     spatial_types: typing.Tuple = (_SpatialLinear, _SpatialConv)
@@ -72,6 +135,26 @@ class Proximity:
 
 @dataclasses.dataclass
 class Transport:
+    """Regularization term discouraging long connections between layers.
+
+    If the connection spatial parameter is large, network should drive
+    it's corresponding network to smaller value in order to improve
+    overall loss induced by this penalty.
+
+    Parameters
+    ----------
+    beta: float
+            Hyperparameter regarding strength of proximity penalty. The higher,
+            the more penalty is incurred upon network for grouping neurons together.
+    norm: str
+            Norm to be used for distance calculation. Either "l1" or "l2" case
+            insensitive allowed.
+    spatial_types: Tuple[type], optional
+            Tuple containing types to be considered spatial.
+            Default: (SpatialLinear, SpatialConv)
+
+    """
+
     beta: float
     norm: str
     spatial_types: typing.Tuple = (_SpatialLinear, _SpatialConv)
