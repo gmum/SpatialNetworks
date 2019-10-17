@@ -32,7 +32,7 @@ def run(args):
     )
 
     # Dummy pass with data to infer input shapes (torchlayers dependency)
-    model(train.shape.unsqueeze(0))  # Unsqueeze to add batch
+    model(train.shape)  # Unsqueeze to add batch
     print(f"Model to be trained:\n{model}\n")
 
     # Model is needed to register it's params for transport & proximity loss functions
