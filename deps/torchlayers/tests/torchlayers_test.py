@@ -1,0 +1,104 @@
+import pathlib
+import tempfile
+
+import torch
+
+import pytest
+import torchlayers
+
+
+@pytest.fixture
+def model():
+    return torchlayers.Sequential(
+        torchlayers.Conv(64),
+        torchlayers.BatchNorm(),
+        torchlayers.ReLU(),
+        torchlayers.Conv(128),
+        torchlayers.BatchNorm(),
+        torchlayers.ReLU(),
+        torchlayers.Conv(256),
+        torchlayers.GlobalMaxPool(),
+        torchlayers.Linear(64),
+        torchlayers.BatchNorm(),
+        torchlayers.Linear(10),
+    )
+
+
+def test_functionality(model):
+    # Initialize
+    model(torch.randn(16, 3, 28, 28))
+
+    optimizer = torch.optim.Adam(model.parameters())
+    criterion = torch.nn.CrossEntropyLoss()
+
+    for _ in range(16):
+        output = model(torch.randn(16, 3, 28, 28))
+        loss = criterion(output, torch.randint(2, (16,)))
+        loss.backward()
+
+        optimizer.zero_grad()
+
+
+def test_print_pre_init(model):
+    target = r"""Sequential(
+  (0): Conv(in_channels=?, out_channels=64, kernel_size=3, stride=1, padding=same, dilation=1, groups=1, bias=True, padding_mode=zeros)
+  (1): BatchNorm(num_features=?, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (2): ReLU()
+  (3): Conv(in_channels=?, out_channels=128, kernel_size=3, stride=1, padding=same, dilation=1, groups=1, bias=True, padding_mode=zeros)
+  (4): BatchNorm(num_features=?, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (5): ReLU()
+  (6): Conv(in_channels=?, out_channels=256, kernel_size=3, stride=1, padding=same, dilation=1, groups=1, bias=True, padding_mode=zeros)
+  (7): GlobalMaxPool()
+  (8): Linear(in_features=?, out_features=64, bias=True)
+  (9): BatchNorm(num_features=?, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (10): Linear(in_features=?, out_features=10, bias=True)
+)"""
+
+    assert target == str(model)
+
+
+def test_attribute_access_existing():
+    layer = torchlayers.Conv(64)
+    assert layer.kernel_size == 3
+    assert layer.padding == "same"
+
+
+def test_attribute_access_notinstantiated():
+    layer = torchlayers.Conv(64)
+    with pytest.raises(AttributeError):
+        non_instantiated_channels = layer.in_channels
+
+    layer(torch.randn(1, 8, 28, 28))
+    assert layer.in_channels == 8
+
+
+def test_save():
+    inputs = torch.randn(16, 32)
+    temp = pathlib.Path(tempfile.gettempdir())
+
+    layer = torchlayers.Linear(64)
+    output = layer(inputs)
+    torch.save(layer, temp / "linear_model.pt")
+
+    new_layer = torch.load(temp / "linear_model.pt")
+    new_output = new_layer(inputs)
+    assert torch.allclose(output, new_output)
+
+
+# def test_dimension_save():
+#     inputs = torch.randn(16, 3, 32, 32)
+#     temp = pathlib.Path(tempfile.gettempdir())
+
+#     layer = torch.nn.Conv2d(3, 64, 3)
+#     output = layer(inputs)
+#     torch.save(layer, temp / "conv_model.pt")
+
+#     new_layer = torch.load(temp / "conv_model.pt")
+#     new_output = new_layer(inputs)
+#     print(new_layer)
+#     print(layer)
+#     print(output.shape)
+#     print(new_output.shape)
+#     print(output[0][0][0][0])
+#     print(new_output[0][0][0][0])
+#     assert torch.allclose(output, new_output)
