@@ -10,7 +10,7 @@ import data
 import nn
 
 from .._dev_utils import get_datasets
-from . import _dev_utils, training
+from . import _dev_utils
 
 
 def run(args):
@@ -27,8 +27,8 @@ def run(args):
 
     # Appropriate dataloader constructed from those datasets
     train, validation = (
-        data.datasets.get(args, hyperparams["batch"], *train_datasets),
-        data.datasets.get(args, hyperparams["batch"], *validation_datasets),
+        data.datasets.get(args, *train_datasets),
+        data.datasets.get(args, *validation_datasets),
     )
 
     # Dummy pass with data to infer input shapes (torchlayers dependency)
@@ -60,9 +60,10 @@ def run(args):
         pathlib.Path(args.save), model, operator=operator.gt, verbose=True
     )
 
-    single_pass = training.Pass(model, loss, optimizer, args.cuda)
-    train_loop = nn.train.get_loop(single_pass, train, hyperparams)
-    validation_loop = nn.train.get_loop(single_pass, validation, hyperparams)
+    train_pass = nn.passes.Train(model, loss, optimizer, args.cuda)
+    validation_pass = nn.passes.Validation(model, loss, args.cuda)
+    train_loop = nn.train.get_loop(train_pass, train, hyperparams)
+    validation_loop = nn.train.get_loop(validation_pass, validation, hyperparams)
 
     # Run training and validation
     for epoch in range(hyperparams["epochs"]):

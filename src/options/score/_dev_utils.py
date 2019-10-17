@@ -27,7 +27,7 @@ def run(loop, gatherer):
 
 # Single pass through data sample
 @dataclasses.dataclass
-class Pass:
+class ValidationPass:
     module: torch.nn.Module
     criterion: typing.Callable
     optimizer: torch.optim.Optimizer

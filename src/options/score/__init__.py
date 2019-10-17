@@ -30,9 +30,8 @@ def run(args):
 
         # Model is needed to register it's params for transport & proximity loss functions
         loss = nn.loss.get(args, model)
-        optimizer = nn.optimizer.get(hyperparams, model)
 
-        single_pass = _dev_utils.Pass(model, loss, optimizer, args.cuda)
+        single_pass = nn.passes.Validation(model, loss, args.cuda)
         writer = SummaryWriter(log_dir=args.tensorboard)
         loop = nn.train.get_loop(single_pass, dataset, hyperparams)
         gatherer = nn.metrics.get(
