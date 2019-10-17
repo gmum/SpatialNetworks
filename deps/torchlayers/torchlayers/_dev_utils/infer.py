@@ -72,18 +72,21 @@ def create_getattr(module):
 def create_reduce(module, *arguments):
     inferred_input, non_inferrable_arguments = process_arguments(*arguments)
 
-    def __reduce__(self) -> str:
+    def __reduce__(self):
         inferred_module = getattr(self, module, None)
         if inferred_module is None:
             raise ValueError(
                 "Model cannot be pickled as it wasn't instantiated. Pass example input through this module."
             )
 
-        return (
-            type(inferred_module),
-            (getattr(inferred_module, inferred_input),)
-            + tuple(getattr(self, arg) for arg in non_inferrable_arguments),
-            inferred_module.state_dict(),
-        )
+        custom_reduce = getattr(inferred_module, "__reduce__", None)
+        if custom_reduce is None:
+            return (
+                type(inferred_module),
+                (getattr(inferred_module, inferred_input),)
+                + tuple(getattr(self, arg) for arg in non_inferrable_arguments),
+                inferred_module.state_dict(),
+            )
+        return custom_reduce()
 
     return __reduce__

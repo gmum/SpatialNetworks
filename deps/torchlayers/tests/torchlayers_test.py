@@ -85,20 +85,32 @@ def test_save():
     assert torch.allclose(output, new_output)
 
 
-# def test_dimension_save():
-#     inputs = torch.randn(16, 3, 32, 32)
-#     temp = pathlib.Path(tempfile.gettempdir())
+def test_convolution_save():
+    inputs = torch.randn(16, 3, 32, 32)
+    temp = pathlib.Path(tempfile.gettempdir())
 
-#     layer = torch.nn.Conv2d(3, 64, 3)
-#     output = layer(inputs)
-#     torch.save(layer, temp / "conv_model.pt")
+    layer = torchlayers.Conv2d(64, kernel_size=3)
+    output = layer(inputs)
+    torch.save(layer, temp / "conv_model.pt")
 
-#     new_layer = torch.load(temp / "conv_model.pt")
-#     new_output = new_layer(inputs)
-#     print(new_layer)
-#     print(layer)
-#     print(output.shape)
-#     print(new_output.shape)
-#     print(output[0][0][0][0])
-#     print(new_output[0][0][0][0])
-#     assert torch.allclose(output, new_output)
+    new_layer = torch.load(temp / "conv_model.pt")
+    new_output = new_layer(inputs)
+    assert torch.allclose(output, new_output)
+
+
+def test_dimension_save():
+    inputs = torch.randn(16, 3, 32, 32)
+    temp = pathlib.Path(tempfile.gettempdir())
+
+    layer = torchlayers.Conv(64)
+    output = layer(inputs)
+    torch.save(layer, temp / "conv_model.pt")
+
+    new_layer = torch.load(temp / "conv_model.pt")
+    new_output = new_layer(inputs)
+    assert torch.allclose(output, new_output)
+
+
+# def test_dir():
+#     print(dir(torchlayers))
+#     assert 0 == 1

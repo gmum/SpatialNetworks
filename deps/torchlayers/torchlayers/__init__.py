@@ -26,6 +26,7 @@ def make_inferrable(module_class):
     signature = inspect.signature(module_class.__init__)
     arguments = [str(argument) for argument in signature.parameters.values()]
 
+    # Arguments: self, input, *
     setattr(inferred_module, "__init__", _dev_utils.infer.create_init(*arguments[2:]))
     setattr(
         inferred_module,
@@ -61,6 +62,7 @@ def make_inferrable(module_class):
 ###############################################################################
 
 
+# Fix dir
 def __dir__():
     return dir(torch.nn)
 
