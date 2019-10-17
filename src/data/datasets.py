@@ -1,7 +1,6 @@
 import typing
 
 import torch
-
 import torchdata
 import torchvision
 
@@ -24,7 +23,8 @@ def get(args, *datasets):
     Returns
     -------
     torch.utils.data.Dataset
-            <return description>
+            Dataset merging all datasets according to `input` argument (for example
+            input concatenation).
 
     """
     # Validate whether they are one of available choices.
@@ -40,40 +40,46 @@ def get(args, *datasets):
 # Could be standard dataset as well, but left it as generator for more concise API
 # Change if you wish
 class Sequential(torch.utils.data.IterableDataset):
-    """Sequential (short summary)."""
+    """Provide samples sequentially.
+
+    This dataset is an instance of IterableDataset for unified API-like structure
+    with MixUp and Stacked (which have to be IterableDataset).
+
+    Parameters
+    ----------
+    labels: int
+            How many labels will this dataset use. Every label will be divided by modulo.
+            This allows datasets with more classes to be considered as multiple datasets
+            with up to `labels` distinct classification labels.
+            For example: Dataset has 50 labels, we want 10, so effectively those
+            will be transformed into 5 * [0,9] labels via modulo operation.
+    sampler_class : torch.utils.data.Sampler
+            Instance of Sampler class (probably from `samplers` module).
+            Specifies how we will iterate over data.
+    *datasets : torch.utils.data.Dataset
+            Varargs containing datasets to be merged
+
+    Yields
+    ------
+    Tensor, int
+            Image, label pair from one of the datasets (exact scheme described by sampler).
+
+    """
 
     def __init__(self, labels: int, sampler_class, *datasets):
-        """<short summary>.
-
-        <extended summary>
-
-        Parameters
-        ----------
-        {{_indent}}labels:{{_indent}} : type
-                <argument description>
-        sampler_class : type
-                <argument description>
-        *datasets : type
-                <argument description>
-
-        Returns
-        -------
-        type
-                <return description>
-
-        """
         self.labels: int = labels
         self.sampler_class = sampler_class
         self.datasets = datasets
 
+        # lengths will be useful to know which dataset we are going to index.
         self.lengths = [0] + torch.cumsum(
             torch.tensor([len(dataset) for dataset in self.datasets]), dim=0
         ).tolist()
         self._last_label = None
 
     def __iter__(self):
-        """__iter__ (short summary)."""
         # Sampler has to be resetted after each full pass through data
+        # Can be considered data shuffle
         self.reset()
         for index in self._sampler:
             # Which dataset should be queried now based on sampler
@@ -92,64 +98,72 @@ class Sequential(torch.utils.data.IterableDataset):
             yield image, label
 
     def __len__(self):
-        """__len__ (short summary)."""
         return sum(len(dataset) for dataset in self.datasets)
 
     def reset(self):
-        """reset (short summary)."""
         self._sampler = self.sampler_class(*self.datasets)
 
     # Used in shape inference, shape of single sample (without labels)
     @property
     def shape(self):
-        """shape (short summary)."""
+        """Shape of single image.
+
+        Convenience method, useful for shape inference in modules.
+        Only image is returned as that's all what's needed by torchlayers.
+
+        Returns
+        -------
+        torch.Tensor
+                Image (with `1` batch size)
+        """
         image, _ = self.datasets[0][0]
-        return image
+        return image.unsqueeze()
 
     # Below properties are used during recording of activations
     @property
     def label(self):
-        """label (short summary)."""
         return self._last_label
 
     @property
     def dataset(self):
-        """dataset (short summary)."""
         return self._last_dataset
 
     @property
     def inner_datasets(self):
-        """inner_datasets (short summary)."""
         return len(self.datasets)
 
 
 class _JoinedDataset(torch.utils.data.IterableDataset):
-    """_JoinedDataset (short summary)."""
+    """Provide joined samples (by some, later to be specified, method).
+
+    This dataset is an instance of IterableDataset as `torch.utils.data.Dataset`
+    __getitem__ magic method cannot receive tensor as index (only `int` or `str`).
+
+    Parameters
+    ----------
+    labels: int
+            How many labels will this dataset use. Every label will be divided by modulo.
+            This allows datasets with more classes to be considered as multiple datasets
+            with up to `labels` distinct classification labels.
+            For example: Dataset has 50 labels, we want 10, so effectively those
+            will be transformed into 5 * [0,9] labels via modulo operation.
+    sampler_class : torch.utils.data.Sampler
+            Instance of Sampler class (probably from `samplers` module).
+            Specifies how we will iterate over data.
+            Special sampler: `samplers.JoinedSampler` should be used.
+    *datasets : torch.utils.data.Dataset
+            Varargs containing datasets to be merged
+
+    Yields
+    ------
+    Tensor, int
+            Image, label pair from one of the datasets (exact scheme described by sampler).
+
+    """
 
     def __init__(
         self, operation: typing.Callable, labels: int, sampler_class, *datasets
     ):
-        """<short summary>.
-
-        <extended summary>
-
-        Parameters
-        ----------
-        {{_indent}}operation:{{_indent}} : type
-                <argument description>
-        {{_indent}}labels:{{_indent}} : type
-                <argument description>
-        sampler_class : type
-                <argument description>
-        *datasets : type
-                <argument description>
-
-        Returns
-        -------
-        type
-                <return description>
-
-        """
         self.labels: int = labels
         self.sampler_class = sampler_class
         self.datasets = datasets
@@ -166,6 +180,8 @@ class _JoinedDataset(torch.utils.data.IterableDataset):
                 sample = dataset[index]
                 X.append(sample[0])
                 y.append(sample[1])
+            y = torch.tensor(y)
+            y %= self.labels
             yield self._operation(X), torch.tensor(y)
 
     def __len__(self):
@@ -185,8 +201,18 @@ class MixUp(_JoinedDataset):
 
     @property
     def shape(self):
+        """Shape of single image.
+
+        Convenience method, useful for shape inference in modules.
+        Only image is returned as that's all what's needed by torchlayers.
+
+        Returns
+        -------
+        torch.Tensor
+                Image (with `1` batch size)
+        """
         image, _ = self.datasets[0][0]
-        return image
+        return image.unsqueeze()
 
 
 class Stacked(_JoinedDataset):
@@ -195,8 +221,18 @@ class Stacked(_JoinedDataset):
 
     @property
     def shape(self):
+        """Shape of single image.
+
+        Convenience method, useful for shape inference in modules.
+        Only image is returned as that's all what's needed by torchlayers.
+
+        Returns
+        -------
+        torch.Tensor
+                Images (with `1` batch size) concatenated along channels dimension.
+        """
         images = []
         for _ in range(len(self.datasets)):
             image, _ = self.datasets[0][0]
             images.append(image)
-        return torch.cat(images, dim=0)
+        return torch.cat(images, dim=0).unsqueeze()
