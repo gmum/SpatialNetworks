@@ -89,7 +89,6 @@ Available arguments are (should be specified in order):
 
 - Fix `einsum` (line `112`, file `/src/nn/loss.py`) and generalize it for convolution case (major)
 - Verify implemented splitting methods (replicate original results) residing in `/src/options/split/` (major)
-- Debug saving of `torchlayers.Conv` and do convolution experiments (major)
 - Verify previous results (major)
 - Add plotting inside `/src/options/plot.py`
 - Fix activation splitting to use unified API (`/src/options/split/activations.py`) (medium)
