@@ -94,6 +94,7 @@ Available arguments are (should be specified in order):
 - Fix activation splitting to use unified API (`/src/options/split/activations.py`) (medium)
 - Fix documentation (minor)
 - Add README.md blanks (minor)
+- Check and validate user's input more thoroughly
 
 
 ## 6. TO-DO experiment wise
