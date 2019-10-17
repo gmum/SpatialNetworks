@@ -194,6 +194,8 @@ class _JoinedDataset(torch.utils.data.IterableDataset):
 # Adding parameters like in real mixup for each dataset?
 # E.g. 1.5 MNIST and 0.2 Fashion-MNIST, could make the task harder
 class MixUp(_JoinedDataset):
+    """Joined dataset summing images."""
+
     def __init__(self, labels: int, sampler, *datasets):
         super().__init__(
             lambda X: torch.stack(X, dim=0).sum(dim=0), labels, sampler, *datasets
@@ -216,6 +218,8 @@ class MixUp(_JoinedDataset):
 
 
 class Stacked(_JoinedDataset):
+    """Joined dataset stacking images."""
+
     def __init__(self, labels: int, sampler, *datasets):
         super().__init__(lambda X: torch.cat(X, dim=0), labels, sampler, *datasets)
 
