@@ -1,0 +1,9 @@
+dvc
+tqdm
+matplotlib
+torchvision
+tensorboard
+tensorflow
+torchfunc
+torchdata
+-e ./deps/torchlayers
