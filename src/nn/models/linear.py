@@ -18,10 +18,14 @@ class _Linear(Base):
 
 
 class SingleOutput(_Linear):
+    """Linear network with single output (for sequential input)."""
+
     def create_bottleneck(self, labels, tasks):
         return torchlayers.Linear(labels)
 
 
 class MultipleOutputs(_Linear):
+    """Linear network with multiple outputs (for concatenation or mixup input)."""
+
     def create_bottleneck(self, labels, tasks):
         return torchlayers.Linear(labels * tasks)

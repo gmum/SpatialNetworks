@@ -17,6 +17,8 @@ class Conv(Base):
 
 
 class SingleOutput(Conv):
+    """Convolution network with single output (for sequential input)."""
+
     def create_bottleneck(self, labels, _):
         return torch.nn.Sequential(
             torchlayers.GlobalMaxPool(), torchlayers.Linear(labels)
@@ -24,6 +26,8 @@ class SingleOutput(Conv):
 
 
 class MultipleOutputs(Conv):
+    """Convolution network with multiple outputs (for concatenation or mixup input)."""
+
     def create_bottleneck(self, labels, tasks):
         return torch.nn.Sequential(
             torchlayers.GlobalMaxPool(), torchlayers.Linear(labels * tasks)
