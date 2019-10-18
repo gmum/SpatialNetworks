@@ -18,7 +18,7 @@ def run(args):
         activation_recorders = recorders.get(dataset, reduction.get(args))
         recorders.register(model, activation_recorders)
         print(f"Recording activations...\n")
-        _dev_utils.record_data(model, dataset, args)
+        _dev_utils.record_state(model, dataset, args)
         finalize.apply(activation_recorders, args)
         print(f"Saving recorded data at: {args.save}\n")
         recorders.save(activation_recorders, args)
