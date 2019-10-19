@@ -48,8 +48,8 @@ train() {
     --save "$4" \
     --tensorboard "$3" \
     --proximity "$7" --transport "$8" --norm "$9" \
-    --hyperparams hyperparameters.json \
-    green_message "TRAINING SUCCESSFUL"
+    --hyperparams hyperparameters.json
+  green_message "TRAINING SUCCESSFUL"
 }
 
 record() {
@@ -91,7 +91,11 @@ score() {
   green_message "SCORING SUCCESSFUL"
 }
 
-# General data and experiments location
+###############################################################################
+#
+#                         DATA AND EXPERIMENTS FOLDER
+#
+###############################################################################
 
 EXPERIMENTS_PATH="./experiments"
 
@@ -112,15 +116,23 @@ DIVIDED_MODELS_DATA="$DATA_PATH/divided_models"
 check_dependencies
 create_folders "$MODEL_DATA" "$TENSORBOARD_DATA" "$RECORD_DATA" "$PLOT_DATA" "$DIVIDED_MODELS_DATA"
 
-# Experiment specific name
+###############################################################################
+#
+#                         EXPERIMENT RELATED NAMING
+#
+###############################################################################
 
 operation=$1
 shift
 
-TRAIN_EXPERIMENT_SPECIFIC=$(sticker "_" "$@")
 EXPERIMENT_SPECIFIC=$(sticker "_" "$@" "$operation")
+TRAIN_EXPERIMENT_SPECIFIC=$(sticker "_" "$@")
 
-# DVC files for reproduction
+###############################################################################
+#
+#                         DVC FILES FOR REPRODUCTION
+#
+###############################################################################
 
 TRAIN_FILE="$EXPERIMENTS_PATH/train_$TRAIN_EXPERIMENT_SPECIFIC.dvc"
 RECORD_FILE="$EXPERIMENTS_PATH/record_$EXPERIMENT_SPECIFIC.dvc"
@@ -128,7 +140,7 @@ PLOT_FILE="$EXPERIMENTS_PATH/plot_$EXPERIMENT_SPECIFIC.dvc"
 DIVIDE_FILE="$EXPERIMENTS_PATH/split_$EXPERIMENT_SPECIFIC.dvc"
 SCORE_FILE="$EXPERIMENTS_PATH/score_$EXPERIMENT_SPECIFIC.dvc"
 
-# ARTEFACTS CREATED BY EXPERIMENT
+# ARTIFACTS CREATED BY EXPERIMENT
 
 MODEL_FILE="$MODEL_DATA/$TRAIN_EXPERIMENT_SPECIFIC.pt"
 TENSORBOARD_FILES="$TENSORBOARD_DATA/$TRAIN_EXPERIMENT_SPECIFIC"
