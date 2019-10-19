@@ -1,5 +1,9 @@
 # [Spatial Neural Networks](https://arxiv.org/abs/1910.02776)
 
+| Version | Docs | Style | Python | PyTorch | Contribute | Roadmap |
+|---------|------|-------|--------|---------|------------|---------|
+| [![Version](https://img.shields.io/static/v1?label=&message=0.0.1&color=377EF0&style=for-the-badge)](https://arxiv.org/abs/1910.02776) | [![Documentation](https://img.shields.io/static/v1?label=&message=docs&color=EE4C2C&style=for-the-badge)](TBD)  | [![style](https://img.shields.io/static/v1?label=&message=CB&color=27A8E0&style=for-the-badge)](TBD) | [![Python](https://img.shields.io/static/v1?label=&message=3.7&color=377EF0&style=for-the-badge&logo=python&logoColor=F8C63D)](https://www.python.org/) | [![PyTorch](https://img.shields.io/static/v1?label=&message=1.2.0&color=EE4C2C&style=for-the-badge)](https://pytorch.org/) | [![Contribute](https://img.shields.io/static/v1?label=&message=guide&color=009688&style=for-the-badge)](https://github.com/szymonmaszke/torchdata/blob/master/CONTRIBUTING.md) | [![Roadmap](https://img.shields.io/static/v1?label=&message=roadmap&color=f50057&style=for-the-badge)](https://github.com/szymonmaszke/torchdata/blob/master/ROADMAP.md)
+
 ## 1. Paper abstract ([arxiv](https://arxiv.org/abs/1910.02776))
 
 We introduce bio-inspired artificial neural networks consisting of neurons that are additionally characterized by spatial positions. 
