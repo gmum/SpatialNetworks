@@ -1,3 +1,12 @@
+"""
+Splitting is currently divided into two parts:
+
+    - backward - methods related to recursive splitting
+    - activations - splitting based on activations per-task power
+
+See package `backward` for info about interface
+
+"""
 import importlib
 import sys
 
