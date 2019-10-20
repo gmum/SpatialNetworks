@@ -117,7 +117,7 @@ class Sequential(torch.utils.data.IterableDataset):
                 Image (with `1` batch size)
         """
         image, _ = self.datasets[0][0]
-        return image.unsqueeze()
+        return image.unsqueeze(dim=0)
 
     # Below properties are used during recording of activations
     @property
@@ -214,7 +214,7 @@ class MixUp(_JoinedDataset):
                 Image (with `1` batch size)
         """
         image, _ = self.datasets[0][0]
-        return image.unsqueeze()
+        return image.unsqueeze(dim=0)
 
 
 class Stacked(_JoinedDataset):
@@ -239,4 +239,4 @@ class Stacked(_JoinedDataset):
         for _ in range(len(self.datasets)):
             image, _ = self.datasets[0][0]
             images.append(image)
-        return torch.cat(images, dim=0).unsqueeze()
+        return torch.cat(images).unsqueeze(dim=0)
