@@ -31,7 +31,7 @@ def get(args):
     network = module_class(
         args.labels,
         len(args.datasets),
-        getattr(torch.nn, args.activation),
+        getattr(torch.nn, args.activation)(),
         args.layers,
         args.where,
     )

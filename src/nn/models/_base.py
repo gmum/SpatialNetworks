@@ -82,7 +82,7 @@ class Base(torch.nn.Module):
 
         modules = []
         for i, width in enumerate(layers):
-            modules += [layer_type_getter(i)(width), activation()]
+            modules += [layer_type_getter(i)(width), activation]
         self.layers = torch.nn.Sequential(*modules)
 
         bottleneck_type = layer_type_getter(len(layers))
