@@ -66,6 +66,7 @@ def generate_networks(args, tasks, masker: typing.Callable):
     with torch.no_grad():
         for task in range(tasks):
             model = get_model(args)
+            masker.last = None
             for module in reversed(list(model.modules())):
                 if hasattr(module, "weight"):
                     mask = masker(module)

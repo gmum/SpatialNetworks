@@ -123,16 +123,6 @@ class Proximity:
         return self.alpha * torch.tensor(proximity_penalty).mean()
 
 
-###############################################################################
-#
-#
-#   CHECK WHETHER EINSUM BELOW, MIGHT BE ROOT OF ERRORS. GENERALIZE IF IT'S WRONG
-#   DON'T HARDCODE LAYER SHAPES TO BE EQUAL IF NOT NECESSARY.
-#
-#
-###############################################################################
-
-
 @dataclasses.dataclass
 class Transport:
     """Regularization term discouraging long connections between layers.
@@ -176,7 +166,7 @@ class Transport:
     def __call__(self, module):
         transport_penalty = []
         submodules = list(module.modules())
-        for i, submodule in enumerate(submodules, start=1):
+        for i, submodule in enumerate(submodules):
             if isinstance(submodule, self.spatial_types):
                 previous_spatial = self._find_previous_spatial(submodules[:i])
                 if previous_spatial is not None:
@@ -189,11 +179,9 @@ class Transport:
                     )
                     distances = distances.pow(2).sum(-1).sqrt()
                     normalized_weights = self._norm_function(submodule.weight)
-                    #
-                    # Check whether this one is truly correct (probably isn't, WIP)
-                    #
+
                     transport_penalty.append(
-                        torch.einsum("ij,j...->ij...", distances, normalized_weights)
+                        (distances * normalized_weights)
                         .mean()
                         .item()
                     )

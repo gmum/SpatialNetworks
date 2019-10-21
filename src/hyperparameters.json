@@ -4,6 +4,6 @@
   "optimizer_args": {
     "lr": 5e-3
   },
-  "batch": 32,
-  "epochs": 20
+  "batch": 256,
+  "epochs": 100
 }

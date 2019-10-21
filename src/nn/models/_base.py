@@ -80,10 +80,13 @@ class Base(torch.nn.Module):
         if layers is None:
             layers = []
 
-        self.layers = torch.nn.Sequential(
-            *[layer_type_getter(i)(width) for i, width in enumerate(layers)]
-        )
-        self.bottleneck = self.create_bottleneck(labels, tasks)
+        modules = []
+        for i, width in enumerate(layers):
+            modules += [layer_type_getter(i)(width), activation()]
+        self.layers = torch.nn.Sequential(*modules)
+
+        bottleneck_type = layer_type_getter(len(layers))
+        self.bottleneck = self.create_bottleneck(labels, tasks, bottleneck_type)
 
     def forward(self, inputs):
         return self.bottleneck(self.layers(self.modify_inputs(inputs)))

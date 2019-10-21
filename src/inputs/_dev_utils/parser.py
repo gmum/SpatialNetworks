@@ -22,5 +22,5 @@ def validate_spatial_locations(args):
 
 def process_arguments(args):
     validate_spatial_arguments(args)
-    validate_spatial_locations(args)
+    # validate_spatial_locations(args)
     return args

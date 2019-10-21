@@ -20,7 +20,7 @@ def run(args):
     datasets = get_datasets(args, train=args.train)
     print(f"Datasets used: {[type(dataset).__name__ for dataset in datasets]}\n")
 
-    dataset = data.datasets.get(args, hyperparams["batch"], *datasets)
+    dataset = data.datasets.get(args, *datasets)
     models = _dev_utils.get_models(args.models)
     for task, model in enumerate(models):
         print(
