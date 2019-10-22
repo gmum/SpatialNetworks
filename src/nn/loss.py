@@ -109,7 +109,7 @@ class Proximity:
         proximity_penalty = []
 
         for submodule in module.modules():
-            if isinstance(submodule, self.spatial_types):
+            if spatial(submodule):
                 positions = submodule.positions
                 # Get a 2-d array of vectors => [N, N, 2]
                 distances = positions.unsqueeze(0) - positions.unsqueeze(1)
