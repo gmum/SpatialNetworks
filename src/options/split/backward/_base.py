@@ -23,7 +23,7 @@ class Base:
     labels: int
 
     def __post_init__(self):
-        self.last: torch.Tensor = None
+        self.reset()
 
     def __call__(self, module):
         weight = torch.abs(module.weight.data)
@@ -32,6 +32,9 @@ class Base:
         else:
             self.last = self.rest(weight)
         return self.last
+
+    def reset(self):
+        self.last: torch.Tensor = None
 
     @abc.abstractmethod
     def first(self, weight):
