@@ -157,7 +157,7 @@ class Transport:
 
     def _find_previous_spatial(self, submodules):
         for module in reversed(submodules):
-            if isinstance(module, self.spatial_types):
+            if spatial(module):
                 return module
         return None
 
