@@ -3,7 +3,7 @@ import typing
 
 import torch
 
-from .layers import _SpatialConv, _SpatialLinear
+from .layers import spatial
 
 
 def get(args, model):
@@ -104,7 +104,6 @@ class Proximity:
 
     alpha: float
     epsilon: float = 1e-8
-    spatial_types: typing.Tuple = (_SpatialLinear, _SpatialConv)
 
     def __call__(self, module):
         proximity_penalty = []
@@ -147,7 +146,6 @@ class Transport:
 
     beta: float
     norm: str
-    spatial_types: typing.Tuple = (_SpatialLinear, _SpatialConv)
 
     def __post_init__(self):
         if self.norm.lower() == "l1":
@@ -167,7 +165,7 @@ class Transport:
         transport_penalty = []
         submodules = list(module.modules())
         for i, submodule in enumerate(submodules):
-            if isinstance(submodule, self.spatial_types):
+            if spatial(submodule):
                 previous_spatial = self._find_previous_spatial(submodules[:i])
                 if previous_spatial is not None:
                     distances = (
@@ -181,9 +179,7 @@ class Transport:
                     normalized_weights = self._norm_function(submodule.weight)
 
                     transport_penalty.append(
-                        (distances * normalized_weights)
-                        .mean()
-                        .item()
+                        (distances * normalized_weights).mean().item()
                     )
 
         return self.beta * torch.tensor(transport_penalty).sum()

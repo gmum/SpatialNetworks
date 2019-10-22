@@ -126,3 +126,19 @@ class _SpatialConv(torchlayers.convolution.Conv):
 
 SpatialLinear = torchlayers.make_inferrable(_SpatialLinear)
 SpatialConv = torchlayers.make_inferrable(_SpatialConv)
+
+
+def spatial(module) -> bool:
+    """Return True if module considered spatial.
+
+    Parameters
+    ----------
+    module: torch.nn.Module
+        PyTorch module
+
+    Returns
+    -------
+    bool
+
+    """
+    return isinstance(module, (_SpatialLinear, _SpatialConv))

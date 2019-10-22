@@ -4,6 +4,8 @@ import typing
 import torch
 import torchfunc
 
+import nn
+
 
 def get_model(args):
     """Load trained model to be splitted.
@@ -68,7 +70,7 @@ def generate_networks(args, tasks, masker: typing.Callable):
             model = get_model(args)
             masker.last = None
             for module in reversed(list(model.modules())):
-                if hasattr(module, "weight"):
+                if hasattr(module, "weight") and nn.layers.spatial(module):
                     mask = masker(module)
                     masker.apply(module.weight.data, mask, task)
             torch.save(model, path / f"{task}.pt")
