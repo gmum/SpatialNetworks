@@ -43,9 +43,11 @@ def get(writer, dataset, stage, tasks):
     return Gather(
         # Each metric logs into Tensorboard under name
         accuracy=Accuracy(
-            writer, name=f"Accuracy/{stage.capitalize()}", samples=len(dataset)
+            writer, name=f"Accuracy/{stage.capitalize()}", samples=len(dataset) * tasks
         ),
-        loss=Loss(writer, name=f"Loss/{stage.capitalize()}", samples=len(dataset)),
+        loss=Loss(
+            writer, name=f"Loss/{stage.capitalize()}", samples=len(dataset) * tasks
+        ),
         # Accuracy per each task
         **{
             f"task{index}_accuracy": PerTaskAccuracy(
