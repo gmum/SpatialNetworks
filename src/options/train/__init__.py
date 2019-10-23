@@ -64,11 +64,11 @@ def run(args):
     # Run training and validation
     for epoch in range(hyperparams["epochs"]):
         print(
-            f"================================TRAINING {epoch}===================================="
+            f"=============================== TRAINING {epoch} ==================================="
         )
         _dev_utils.run(train_loop, train_gatherer, epoch, checkpointer, train=True)
         print(
-            "===============================VALIDATION {epoch}==================================="
+            f"============================== VALIDATION {epoch} =================================="
         )
         _dev_utils.run(
             validation_loop, validation_gatherer, epoch, checkpointer, train=False
