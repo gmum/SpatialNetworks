@@ -14,45 +14,27 @@ not only corresponds to the biological systems, but also allows for further insi
 
 ## 2. Dependencies
 
-To start, install `conda` on your workstation and run
+Dependencies are gathered inside `requirements.txt`.
+We advise to use `conda` environment for easier package management.
+
+### 2.1 Setup `conda` [optional]
+
+- Install conda for your specific OS, see instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
+- Create new environment by issuing from shell: `$ conda create --name SpatialNetworks`
+- Activate environment: `$ conda activate SpatialNetworks`
+- Install `pip` within environment: `$ conda install pip`
+
+### 2.2 Install packages
+
+Make sure you have `pip` installed (see [documentation](https://packaging.python.org/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line)) and run:
 
 ```
-./install
-```
-
-from your root directory. This script will create separate `conda` environment
-and install all necessary dependencies.
-
-If the following doesn't work, you can install all dependencies via `pip`:
-
-```shell
 pip install -r requirements.txt
 ```
 
+Specify `--user` flag if needed.
+
 ## 3. Performing experiments
-
-### 3.1 Perform all steps [WIP]
-
-Run `./experiment <args>` with appropriate arguments. All specific steps 
-(if applicable to your settings will be performed) will be performed automatically.
-Experiment results will be logged to appropriate file as well via [`DVC`](https://dvc.org/) 
-(machine learning version control system).
-
-You can find experiment related stuff inside your `cwd` within experiment.
-Each experiment will be named by the varying arguments you passed, for example:
-
-```
-
-```
-
-Available arguments are (should be specified in order):
-
-- 
-- 
-- 
-- 
-
-### 3.2 Run specific step
 
 Experiments are divided into subsections.
 To perform specific part use `python main.py <subsection>`.
@@ -67,24 +49,35 @@ Currently following options are available
 
 Issue `python main.py <subsection> --help` to see available options for each subsection.
 
+To help with reproducibility later, please wrap your experiments commands with `dvc` (see their [documentation](https://dvc.org/doc)).
 
-## 4. Replicating experiments [WIP]
+## 4. Replicate paper findings [WIP]
 
-[`DVC`](https://dvc.org/) is used to keep track of experiments. It should be installed
-inside `conda` environment after running `./install` described in Dependencies subsection.
+Saved experiment files are located inside `/experiments` folder.
 
-Run from `/src`:
+Following experiments are available:
+
+-
+-
+
+Parts shared between experiments will be cached using `dvc`.
+
+### 4.1 Reproduce all experiments
+
+To reproduce all of them, run from within `/experiments` folder:
 
 ```
-./replicate <arguments>
+./reproduce
 ```
 
-in order to perform replication of necessary steps (those are cached if already existing).
+### 4.2 Reproduce specific experiment
 
+Shared parts of experiments will be cached for later reuse in other parts.
 
-Available arguments are (should be specified in order):
+Run the following command:
 
-- 
-- 
-- 
-- 
+```
+dvc repro <experiment>.dvc
+```
+
+Where `experiment` is one of the experiments listed at the beginning of this paragraph.
