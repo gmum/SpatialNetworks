@@ -35,7 +35,7 @@ def run(args):
         writer = SummaryWriter(log_dir=args.tensorboard)
         loop = nn.train.get_loop(single_pass, dataset, hyperparams)
         gatherer = nn.metrics.get(
-            writer, dataset, hyperparams, stage=f"Task{task}", tasks=len(datasets)
+            writer, dataset, stage=f"Task{task}", tasks=len(datasets)
         )
 
         # Run training and validation

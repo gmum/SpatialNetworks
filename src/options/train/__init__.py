@@ -45,14 +45,10 @@ def run(args):
     )
     writer = SummaryWriter(log_dir=args.tensorboard)
     train_gatherer = nn.metrics.get(
-        writer, train, hyperparams, stage="Train", tasks=len(train_datasets)
+        writer, train, stage="Train", tasks=len(train_datasets)
     )
     validation_gatherer = nn.metrics.get(
-        writer,
-        validation,
-        hyperparams,
-        stage="Validation",
-        tasks=len(validation_datasets),
+        writer, validation, stage="Validation", tasks=len(validation_datasets)
     )
 
     # Save best model

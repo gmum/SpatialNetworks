@@ -9,7 +9,7 @@ If you want to perform additional measures of performance, please place them her
 import abc
 
 
-def get(writer, dataset, hyperparams, stage, tasks):
+def get(writer, dataset, stage, tasks):
     """Based on user input return metrics attached to the network.
 
     Following metrics will be returned:
@@ -26,9 +26,6 @@ def get(writer, dataset, hyperparams, stage, tasks):
             Writer responsible for logging values.
     dataset: torch.utils.data.Dataset
             Dataset with `len` method (used for calculation of number of samples).
-    hyperparams: Dict
-            Dictionary containing hyperparameters specified by user with
-            --hyperparams flag.
     stage: str
             Under which name results will be logged by Tensorboard. Usually
             it's something like train, validation, test. Case insensitive,
@@ -43,25 +40,18 @@ def get(writer, dataset, hyperparams, stage, tasks):
 
     """
 
-    samples = len(dataset) // hyperparams["batch"]
     return Gather(
         # Each metric logs into Tensorboard under name
         accuracy=Accuracy(
-            writer,
-            name=f"Accuracy/{stage.capitalize()}",
-            samples=len(dataset) // hyperparams["batch"],
+            writer, name=f"Accuracy/{stage.capitalize()}", samples=len(dataset)
         ),
-        loss=Loss(
-            writer,
-            name=f"Loss/{stage.capitalize()}",
-            samples=len(dataset) // hyperparams["batch"],
-        ),
+        loss=Loss(writer, name=f"Loss/{stage.capitalize()}", samples=len(dataset)),
         # Accuracy per each task
         **{
             f"task{index}_accuracy": PerTaskAccuracy(
                 writer,
                 name=f"AccuracyTask{index}/{stage.capitalize()}",
-                samples=samples,
+                samples=len(dataset),
                 task=index,
             )
             for index in range(tasks)
@@ -138,7 +128,7 @@ class Accuracy(TensorboardMean):
         if len(y_true.shape) > 1:
             y_pred = y_pred.reshape(y_true.shape[0], -1, y_true.shape[1])
 
-        self.score += (y_pred.argmax(dim=1) == y_true).float().mean()
+        self.score += (y_pred.argmax(dim=1) == y_true).float().sum()
 
 
 class PerTaskAccuracy(TensorboardMean):
@@ -172,7 +162,7 @@ class PerTaskAccuracy(TensorboardMean):
             y_pred = y_pred[..., self.task]
 
         y_true = y_true[..., self.task]
-        self.score += (y_pred.argmax(dim=1) == y_true).float().mean()
+        self.score += (y_pred.argmax(dim=1) == y_true).float().sum()
 
 
 class Gather:
