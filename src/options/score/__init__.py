@@ -22,6 +22,7 @@ def run(args):
 
     dataset = data.datasets.get(args, *datasets)
     models = _dev_utils.get_models(args.models)
+    writer = SummaryWriter(log_dir=args.tensorboard)
     for task, model in enumerate(models):
         print(
             f"==================================TASK {task}======================================"
@@ -31,11 +32,11 @@ def run(args):
         # Model is needed to register it's params for transport & proximity loss functions
         loss = nn.loss.get(args, model)
 
+        # New, better logging of results into tensorboard
         single_pass = nn.passes.Validation(model, loss, args.cuda)
-        writer = SummaryWriter(log_dir=args.tensorboard)
         loop = nn.train.get_loop(single_pass, dataset, hyperparams)
         gatherer = nn.metrics.get(
-            writer, dataset, stage=f"Task{task}", tasks=len(datasets)
+            writer, dataset, stage=f"SingleTaskModel{task}", tasks=len(datasets)
         )
 
         # Run training and validation
