@@ -17,7 +17,7 @@ def get_models(folder: pathlib.Path):
         Consecutive splitted models
 
     """
-    for path in pathlib.Path(folder).glob("*"):
+    for path in sorted(pathlib.Path(folder).glob("*")):
         yield torch.load(path)
 
 
