@@ -119,7 +119,7 @@ class Loss(TensorboardMean):
 class Accuracy(TensorboardMean):
     """Calculate mean accuracy of neural network predictions across all tasks.
 
-    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    For MultiOutput (e.g. mix or concatenation) output of the final layer
     has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`
     and it's done automatically in this function.
 
@@ -136,7 +136,7 @@ class Accuracy(TensorboardMean):
 class PerTaskAccuracy(TensorboardMean):
     """Calculate mean accuracy of only specific task.
 
-    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    For MultiOutput (e.g. mix or concatenation) output of the final layer
     has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`
     and it's done automatically in this function.
 

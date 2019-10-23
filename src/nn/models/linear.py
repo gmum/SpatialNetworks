@@ -25,7 +25,7 @@ class SingleOutput(_Linear):
 
 
 class MultipleOutputs(_Linear):
-    """Linear network with multiple outputs (for concatenation or mixup input)."""
+    """Linear network with multiple outputs (for concatenation or mix input)."""
 
     def create_bottleneck(self, labels, tasks, linear_cls):
         return linear_cls(labels * tasks)

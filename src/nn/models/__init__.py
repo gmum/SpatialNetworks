@@ -19,7 +19,7 @@ def get(args):
     torch.nn.Module
             Either convolutional or linear model with spatial layers where
             specified. Either single output (for sequential tasks) or with multiple
-            outputs (for mixup or concatenation).
+            outputs (for mix or concatenation).
 
     """
     module = args.type.lower()

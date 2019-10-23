@@ -59,6 +59,8 @@ def train(subparsers) -> None:
     subparser.add_argument(
         "--type",
         required=True,
+        choices=("linear", "convolution"),
+        type=str.lower,
         help="""Type of layer. One of "Linear" or "Convolution" available."""
         "This option is case insensitive.",
     )
@@ -66,8 +68,10 @@ def train(subparsers) -> None:
     subparser.add_argument(
         "--input",
         required=True,
+        choices=("sequential", "concatenate", "mix"),
+        type=str.lower,
         help="Type of input (how data will be presented for the neural net). Available modes: \n"
-        """- "Sequential"\n- "Mixup"\n- "Concatenate"\n"""
+        """- "Sequential"\n- "Mix"\n- "Concatenate"\n"""
         "This option is case insensitive.",
     )
 
@@ -100,26 +104,28 @@ def train(subparsers) -> None:
     subparser.add_argument(
         "--proximity",
         required=False,
-        default=None,
+        default=0.0,
         type=float,
-        help="Proximity loss parameter specified as float for all Spatial Layers.\n "
-        "Has to be specified if any index was specified inside --where",
+        help="Proximity loss parameter specified as float for all Spatial Layers (if any).\n "
+        "Default: 0 (acts just like Linear)",
     )
 
     subparser.add_argument(
         "--transport",
         required=False,
-        default=None,
+        default=0.0,
         type=float,
-        help="Transport loss parameter specified as float for all Spatial Layers.\n "
-        "Has to be specified if any index was specified inside --where",
+        help="Transport loss parameter specified as float for all Spatial Layers (if any).\n "
+        "Default: 0 (acts just like Linear)",
     )
 
     subparser.add_argument(
         "--norm",
         required=False,
+        choices=("l1", "l2"),
+        type=str.lower,
         help="Norm used in transport loss. Either L1 or L2. Case insensitive",
-        default=None,
+        default="l2",
     )
 
 
@@ -135,8 +141,10 @@ def record(subparsers) -> None:
     subparser.add_argument(
         "--input",
         required=True,
+        choices=("sequential", "concatenate", "mix"),
+        type=str.lower,
         help="Type of input (how data will be presented for the neural net). Available modes: \n"
-        """- "Sequential"\n- "Mixup"\n- "Concatenate"\n"""
+        """- "Sequential"\n- "Mix"\n- "Concatenate"\n"""
         "This option is case insensitive.",
     )
 
@@ -156,6 +164,8 @@ def record(subparsers) -> None:
     subparser.add_argument(
         "--reduction",
         required=True,
+        choices=("mean", "variance"),
+        type=str.lower,
         help="What reduction to use. Available options:\n"
         """- "Mean"\n- "Variance"\n"""
         "This option is case insensitive.",
@@ -227,6 +237,8 @@ def split(subparsers) -> None:
     subparser.add_argument(
         "--method",
         required=True,
+        choices=("activations", "greedy", "rescale", "probability"),
+        type=str.lower,
         help="Method to split neural network.\n"
         "Available options:\n-'Activations' (to be fixed)\n-'Greedy'\n-'Rescale'\n-'Probability'\n"
         "Option is case insensitive.",
@@ -271,7 +283,10 @@ def score(subparsers) -> None:
     subparser.add_argument(
         "--input",
         required=True,
-        help="""Type of input. One of "Sequential", "Mixup" or "Concatenate" available."""
+        choices=("sequential", "concatenate", "mix"),
+        type=str.lower,
+        help="Type of input (how data will be presented for the neural net). Available modes: \n"
+        """- "Sequential"\n- "Mix"\n- "Concatenate"\n"""
         "This option is case insensitive.",
     )
 

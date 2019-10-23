@@ -61,7 +61,7 @@ class TaskSampler(Sampler):
 class JoinedSampler(Sampler):
     """Return multiple indices each for one dataset.
 
-    Used by concatenation and mixup inputs (or any other where elements)
+    Used by concatenation and mix inputs (or any other where elements)
     from datasets are needed at the same time.
 
     Datasets will be sampled with replacement if they don't have the same

@@ -34,7 +34,7 @@ def get(args, model):
 class CustomCrossEntropyLoss:
     """Normal CrossEntropyLoss, but reshapes neural net output appropriately.
 
-    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    For MultiOutput (e.g. mix or concatenation) output of the final layer
     has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`.
 
     """
@@ -50,7 +50,7 @@ class CustomCrossEntropyLoss:
 class SpatialCrossEntropyLoss:
     """Normal CrossEntropyLoss, but reshapes neural net output appropriately.
 
-    For MultiOutput (e.g. mixup or concatenation) output of the final layer
+    For MultiOutput (e.g. mix or concatenation) output of the final layer
     has to be reshaped from `(batch, task * classes)` into `(batch, task, labels)`.
 
     Parameters

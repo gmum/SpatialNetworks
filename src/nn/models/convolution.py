@@ -26,7 +26,7 @@ class SingleOutput(Conv):
 
 
 class MultipleOutputs(Conv):
-    """Convolution network with multiple outputs (for concatenation or mixup input)."""
+    """Convolution network with multiple outputs (for concatenation or mix input)."""
 
     def create_bottleneck(self, labels, tasks, linear_cls):
         return torch.nn.Sequential(

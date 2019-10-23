@@ -32,8 +32,8 @@ def get(args, *datasets):
         if args.task:
             return Sequential(args.labels, samplers.TaskSampler, *datasets)
         return Sequential(args.labels, samplers.DatasetRandomSampler, *datasets)
-    elif args.input.lower() == "mixup":
-        return MixUp(args.labels, samplers.JoinedSampler, *datasets)
+    elif args.input.lower() == "mix":
+        return Mix(args.labels, samplers.JoinedSampler, *datasets)
     return Stacked(args.labels, samplers.JoinedSampler, *datasets)
 
 
@@ -43,7 +43,7 @@ class Sequential(torch.utils.data.IterableDataset):
     """Provide samples sequentially.
 
     This dataset is an instance of IterableDataset for unified API-like structure
-    with MixUp and Stacked (which have to be IterableDataset).
+    with Mix and Stacked (which have to be IterableDataset).
 
     Parameters
     ----------
@@ -191,9 +191,9 @@ class _JoinedDataset(torch.utils.data.IterableDataset):
         self._sampler = self.sampler_class(*self.datasets)
 
 
-# Adding parameters like in real mixup for each dataset?
+# Adding parameters like in real mix for each dataset?
 # E.g. 1.5 MNIST and 0.2 Fashion-MNIST, could make the task harder
-class MixUp(_JoinedDataset):
+class Mix(_JoinedDataset):
     """Joined dataset summing images."""
 
     def __init__(self, labels: int, sampler, *datasets):
