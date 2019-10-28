@@ -182,7 +182,7 @@ class _JoinedDataset(torch.utils.data.IterableDataset):
                 y.append(sample[1])
             y = torch.tensor(y)
             y %= self.labels
-            yield self._operation(X), torch.tensor(y)
+            yield self._operation(X), y
 
     def __len__(self):
         return self._length
