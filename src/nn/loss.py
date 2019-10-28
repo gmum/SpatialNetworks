@@ -117,9 +117,9 @@ class Proximity:
                 distances = distances.pow(2).sum(-1).view(-1)
                 # Take a square root after making sure that there are no zeros
                 distances = (distances + self.epsilon).sqrt()
-                proximity_penalty.append(torch.exp(-distances).mean().item())
+                proximity_penalty.append(torch.exp(-distances).mean())
 
-        return self.alpha * torch.tensor(proximity_penalty).mean()
+        return self.alpha * torch.stack(proximity_penalty).mean()
 
 
 @dataclasses.dataclass
@@ -179,7 +179,7 @@ class Transport:
                     normalized_weights = self._norm_function(submodule.weight)
 
                     transport_penalty.append(
-                        (distances * normalized_weights).mean().item()
+                        (distances * normalized_weights).mean()
                     )
 
-        return self.beta * torch.tensor(transport_penalty).sum()
+        return self.beta * torch.stack(transport_penalty).mean()
