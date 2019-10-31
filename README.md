@@ -50,34 +50,3 @@ Currently following options are available
 Issue `python main.py <subsection> --help` to see available options for each subsection.
 
 To help with reproducibility later, please wrap your experiments commands with `dvc` (see their [documentation](https://dvc.org/doc)).
-
-## 4. Replicate paper findings [WIP]
-
-Saved experiment files are located inside `/experiments` folder.
-
-Following experiments are available:
-
--
--
-
-Parts shared between experiments will be cached using `dvc`.
-
-### 4.1 Reproduce all experiments
-
-To reproduce all of them, run from within `/experiments` folder:
-
-```
-./reproduce
-```
-
-### 4.2 Reproduce specific experiment
-
-Shared parts of experiments will be cached for later reuse in other parts.
-
-Run the following command:
-
-```
-dvc repro <experiment>.dvc
-```
-
-Where `experiment` is one of the experiments listed at the beginning of this paragraph.
