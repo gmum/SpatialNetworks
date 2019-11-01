@@ -27,7 +27,7 @@ def get(args, model):
 
     """
     if hasattr(args, "where") and args.where is not None:
-        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm)
+        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm, args.where)
     return CustomCrossEntropyLoss()
 
 
@@ -66,10 +66,10 @@ class SpatialCrossEntropyLoss:
 
     """
 
-    def __init__(self, module, proximity, transport, norm):
+    def __init__(self, module, proximity, transport, norm, where):
         self.module = module
-        self.proximity = Proximity(proximity)
-        self.transport = Transport(transport, norm)
+        self.proximity = Proximity(proximity, where)
+        self.transport = Transport(transport, norm, where)
 
     def __call__(self, y_pred, y_true):
         if len(y_true.shape) > 1:
@@ -103,21 +103,25 @@ class Proximity:
     """
 
     alpha: float
+    where: typing.List[int]
     epsilon: float = 1e-8
 
     def __call__(self, module):
         proximity_penalty = []
 
+        spatial_idx = 0
         for submodule in module.modules():
             if spatial(submodule):
-                positions = submodule.positions
-                # Get a 2-d array of vectors => [N, N, 2]
-                distances = positions.unsqueeze(0) - positions.unsqueeze(1)
-                # Calculate squared distances and flatten => [N, N]
-                distances = distances.pow(2).sum(-1).view(-1)
-                # Take a square root after making sure that there are no zeros
-                distances = (distances + self.epsilon).sqrt()
-                proximity_penalty.append(torch.exp(-distances).mean())
+                if spatial_idx in self.where:
+                    positions = submodule.positions.T
+                    # Get a 2-d array of vectors => [N, N, 2]
+                    distances = positions.unsqueeze(0) - positions.unsqueeze(1)
+                    # Calculate squared distances and flatten => [N, N]
+                    distances = distances.pow(2).sum(-1).view(-1)
+                    # Take a square root after making sure that there are no zeros
+                    distances = (distances + self.epsilon).sqrt()
+                    proximity_penalty.append(torch.exp(-distances).mean())
+                spatial_idx += 1
 
         return self.alpha * torch.stack(proximity_penalty).mean()
 
@@ -146,6 +150,7 @@ class Transport:
 
     beta: float
     norm: str
+    where: typing.List[int]
 
     def __post_init__(self):
         if self.norm.lower() == "l1":
@@ -164,10 +169,11 @@ class Transport:
     def __call__(self, module):
         transport_penalty = []
         submodules = list(module.modules())
+        spatial_idx = 0
         for i, submodule in enumerate(submodules):
             if spatial(submodule):
                 previous_spatial = self._find_previous_spatial(submodules[:i])
-                if previous_spatial is not None:
+                if previous_spatial is not None and spatial_idx in self.where:
                     distances = (
                         # Weights are of shape (2, out) for easier generalization
                         # With convolution
@@ -181,5 +187,6 @@ class Transport:
                     transport_penalty.append(
                         (distances * normalized_weights).mean()
                     )
+                spatial_idx += 1
 
         return self.beta * torch.stack(transport_penalty).mean()

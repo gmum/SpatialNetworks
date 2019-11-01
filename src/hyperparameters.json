@@ -1,9 +1,9 @@
 {
-  "seed": 0,
+  "seed": 1,
   "optimizer_name": "Adam",
   "optimizer_args": {
     "lr": 5e-3
   },
   "batch": 256,
-  "epochs": 100
+  "epochs": 50
 }

@@ -50,10 +50,10 @@ def train(subparsers) -> None:
         default=None,
         type=int,
         nargs="+",
-        help="Index of layer layers to be Spatial.\n"
+        help="Indices of layers to which we apply the spatial costs.\n"
         "Those are calculated based on modules function, not children.\n"
         "Check whether your model is as you desired (will be printed at the beginning of training).\n"
-        "If unspecified, NO layers will be of Spatial type (default behaviour).",
+        "If unspecified, the spatial costs won't be applied to any layers (default behaviour).",
     )
 
     subparser.add_argument(
@@ -242,6 +242,15 @@ def split(subparsers) -> None:
         help="Method to split neural network.\n"
         "Available options:\n-'Activations' (to be fixed)\n-'Greedy'\n-'Rescale'\n-'Probability'\n"
         "Option is case insensitive.",
+    )
+
+    subparser.add_argument(
+        "--where",
+        required=False,
+        default=None,
+        type=int,
+        nargs="+",
+        help="Indices of linear modules that will be split.\n"
     )
 
     subparser.add_argument(

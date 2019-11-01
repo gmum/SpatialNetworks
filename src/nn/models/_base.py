@@ -75,17 +75,16 @@ class Base(torch.nn.Module):
         where: typing.List[int],
     ):
         super().__init__()
-        layer_type_getter = _GetLayer(self.regular_type, self.spatial_type, where)
 
         if layers is None:
             layers = []
 
         modules = []
         for i, width in enumerate(layers):
-            modules += [layer_type_getter(i)(width), activation]
+            modules += [self.spatial_type(width), activation]
         self.layers = torch.nn.Sequential(*modules)
 
-        bottleneck_type = layer_type_getter(len(layers))
+        bottleneck_type = self.spatial_type
         self.bottleneck = self.create_bottleneck(labels, tasks, bottleneck_type)
 
     def forward(self, inputs):

@@ -99,14 +99,12 @@ def generate_networks(args, tasks, masker: typing.Callable):
     masks = get_masks(args, tasks, masker)
 
     for task in range(tasks):
-        mask_idx = 0
         model = get_model(args)
+        layer_idx = 0
         for module in model.modules():
             if nn.layers.spatial(module):
-                if mask_idx == 0:  # skip the first layer
-                    mask_idx += 1
-                    continue
-
-                masker.apply(module.weight.data, masks[mask_idx], task)
-                mask_idx += 1
+                print(masks[layer_idx].shape, module)
+                if layer_idx in args.where:
+                    masker.apply(module.weight.data, masks[layer_idx], task)
+                layer_idx += 1
         torch.save(model, path / f"{task}.pt")
