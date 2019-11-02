@@ -76,7 +76,6 @@ class SpatialCrossEntropyLoss:
         if len(y_true.shape) > 1:
             y_pred = y_pred.reshape(y_true.shape[0], -1, y_true.shape[1])
         else: # Sequential setting
-            print("Jestesmy tutaj? czemu?", y_true.shape)
             indices = (y_true // self.labels).long()
             indices = indices.repeat_interleave(self.labels)
             y_pred = y_pred.reshape(y_true.shape[0], self.labels, -1)
