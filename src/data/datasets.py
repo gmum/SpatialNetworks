@@ -88,11 +88,8 @@ class Sequential(torch.utils.data.IterableDataset):
             image, label = self.datasets[dataset_index][
                 index - self.lengths[dataset_index]
             ]
-            # If there are more labels in dataset than specified (say 50)
-            # Take modulo and assume those are the same.
-            # E.g. Dataset with 50 labels, when 10 specified, would effectively
-            # become 5 separate datasets with 10 labels
-            label %= self.labels
+
+            label += dataset_index * self.labels
             self._last_label = label
             self._last_dataset = dataset_index
             yield image, label

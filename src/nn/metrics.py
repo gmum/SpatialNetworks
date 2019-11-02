@@ -8,8 +8,7 @@ If you want to perform additional measures of performance, please place them her
 
 import abc
 
-
-def get(writer, dataset, stage, tasks):
+def get(writer, dataset, stage, tasks, input_type):
     """Based on user input return metrics attached to the network.
 
     Following metrics will be returned:
@@ -22,7 +21,7 @@ def get(writer, dataset, stage, tasks):
 
     Parameters
     ----------
-    writer : torch.utils.temsorboard.SummaryWriter
+    writer : torch.utils.tensorboard.SummaryWriter
             Writer responsible for logging values.
     dataset: torch.utils.data.Dataset
             Dataset with `len` method (used for calculation of number of samples).
@@ -32,6 +31,8 @@ def get(writer, dataset, stage, tasks):
             will be automatically capitalized.
     tasks: int
             How many tasks were specified by the user.
+    input_type: str
+            Type of the input as string
 
     Returns
     -------
@@ -40,20 +41,26 @@ def get(writer, dataset, stage, tasks):
 
     """
 
+    if input_type.lower() == "sequential":
+        samples = len(dataset)
+    else:
+        samples = len(dataset) * tasks
+
     return Gather(
         # Each metric logs into Tensorboard under name
         accuracy=Accuracy(
-            writer, name=f"Accuracy/{stage.capitalize()}", samples=len(dataset) * tasks
+            writer, name=f"Accuracy/{stage.capitalize()}", samples=samples, labels=dataset.labels
         ),
         loss=Loss(
-            writer, name=f"Loss/{stage.capitalize()}", samples=len(dataset) * tasks
+            writer, name=f"Loss/{stage.capitalize()}", samples=samples, labels=dataset.labels
         ),
         # Accuracy per each task
         **{
             f"task{index}_accuracy": PerTaskAccuracy(
                 writer,
                 name=f"AccuracyTask{index}/{stage.capitalize()}",
-                samples=len(dataset),
+                samples=samples // tasks,
+                labels=dataset.labels,
                 task=index,
             )
             for index in range(tasks)
@@ -72,7 +79,7 @@ class TensorboardMean:
 
     Parameters
     ----------
-    writer : torch.utils.temsorboard.SummaryWriter
+    writer : torch.utils.tensorboard.SummaryWriter
             Writer responsible for logging values.
     name: str
             Named under which values will be logged into Tensorboard.
@@ -81,7 +88,7 @@ class TensorboardMean:
 
     """
 
-    def __init__(self, writer, name: str, samples: int):
+    def __init__(self, writer, name: str, samples: int, labels: int):
         self.writer = writer
         self.name: str = name
 
@@ -89,6 +96,7 @@ class TensorboardMean:
         self.step: int = 0
         # Samples iteratively? Minor
         self.samples: int = samples
+        self.labels: int = labels
 
     @abc.abstractmethod
     def __call__(self, output):
@@ -129,6 +137,12 @@ class Accuracy(TensorboardMean):
         _, y_pred, y_true, = output
         if len(y_true.shape) > 1:
             y_pred = y_pred.reshape(y_true.shape[0], -1, y_true.shape[1])
+        else: # Sequential setting
+            indices = (y_true // self.labels).long()
+            indices = indices.repeat_interleave(self.labels)
+            y_pred = y_pred.reshape(y_true.shape[0], self.labels, -1)
+            y_pred = y_pred.gather(2, indices.view(-1, 10, 1)).squeeze()
+            y_true %= self.labels
 
         self.score += (y_pred.argmax(dim=1) == y_true).float().sum()
 
@@ -142,7 +156,7 @@ class PerTaskAccuracy(TensorboardMean):
 
     Parameters
     ----------
-    writer : torch.utils.temsorboard.SummaryWriter
+    writer : torch.utils.tensorboard.SummaryWriter
             Writer responsible for logging values.
     name: str
             Named under which values will be logged into Tensorboard.
@@ -153,8 +167,8 @@ class PerTaskAccuracy(TensorboardMean):
 
     """
 
-    def __init__(self, writer, name: str, samples: int, task: int):
-        super().__init__(writer, name, samples)
+    def __init__(self, writer, name: str, samples: int, labels: int, task: int):
+        super().__init__(writer, name, samples, labels)
         self.task: int = task
 
     def __call__(self, output):
@@ -162,8 +176,16 @@ class PerTaskAccuracy(TensorboardMean):
         if len(y_true.shape) > 1:
             y_pred = y_pred.reshape(y_true.shape[0], -1, y_true.shape[1])
             y_pred = y_pred[..., self.task]
+            y_true = y_true[..., self.task]
+        else: # Sequential setting
+            indices = (y_true // self.labels).long()
+            y_pred = y_pred.reshape(y_true.shape[0], self.labels, -1)
+            y_true = y_true[indices == self.task]
+            y_pred = y_pred[indices == self.task]
+            y_pred = y_pred[..., self.task]
 
-        y_true = y_true[..., self.task]
+            y_true %= self.labels
+
         self.score += (y_pred.argmax(dim=1) == y_true).float().sum()
 
 

@@ -319,6 +319,18 @@ def score(subparsers) -> None:
     )
 
     subparser.add_argument(
+        "--task",
+        default=False,
+        action="store_true",
+        help="Type of Sampler used for sequential inputs.\n"
+        "Either 'Random' (for random access across all tasks)"
+        "or 'Task' (iterate over task sequentially as well).\n"
+        "Only used when --input is chosen to be sequential and has to be specified in this case.\n"
+        "Default: Random",
+    )
+
+
+    subparser.add_argument(
         "--train",
         action="store_true",
         default=False,

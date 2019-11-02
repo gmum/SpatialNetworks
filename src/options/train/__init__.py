@@ -45,16 +45,14 @@ def run(args):
     )
     writer = SummaryWriter(log_dir=args.tensorboard)
     train_gatherer = nn.metrics.get(
-        writer, train, stage="Train", tasks=len(train_datasets)
+        writer, train, stage="Train", tasks=len(train_datasets), input_type=args.input,
     )
     validation_gatherer = nn.metrics.get(
-        writer, validation, stage="Validation", tasks=len(validation_datasets)
+        writer, validation, stage="Validation", tasks=len(validation_datasets), input_type=args.input
     )
 
     # Save best model
-    checkpointer = nn.callbacks.SaveBest(
-        pathlib.Path(args.save), model, operator=operator.gt, verbose=True
-    )
+    checkpointer = None
 
     train_pass = nn.passes.Train(model, loss, optimizer, args.cuda)
     validation_pass = nn.passes.Validation(model, loss, args.cuda)
@@ -66,10 +64,12 @@ def run(args):
         print(
             f"=============================== TRAINING {epoch} ==================================="
         )
-        _dev_utils.run(train_loop, train_gatherer, epoch, checkpointer, train=True)
+        _dev_utils.run(train_loop, train_gatherer, epoch, True, checkpointer)
         print(
             f"============================== VALIDATION {epoch} =================================="
         )
         _dev_utils.run(
-            validation_loop, validation_gatherer, epoch, checkpointer, train=False
+            validation_loop, validation_gatherer, epoch, False, checkpointer
         )
+    print(f"Final model, saving at: {args.save}")
+    torch.save(model, args.save)

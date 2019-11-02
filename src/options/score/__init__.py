@@ -36,7 +36,7 @@ def run(args):
         single_pass = nn.passes.Validation(model, loss, args.cuda)
         loop = nn.train.get_loop(single_pass, dataset, hyperparams)
         gatherer = nn.metrics.get(
-            writer, dataset, stage=f"SingleTaskModel{task}", tasks=len(datasets)
+            writer, dataset, stage=f"SingleTaskModel{task}", tasks=len(datasets), input_type=args.input
         )
 
         # Run training and validation
