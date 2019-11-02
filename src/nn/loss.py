@@ -27,7 +27,7 @@ def get(args, model):
 
     """
     if hasattr(args, "where") and args.where is not None:
-        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm, args.where)
+        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm, args.where, args.labels)
     return CustomCrossEntropyLoss()
 
 
@@ -66,14 +66,23 @@ class SpatialCrossEntropyLoss:
 
     """
 
-    def __init__(self, module, proximity, transport, norm, where):
+    def __init__(self, module, proximity, transport, norm, where, labels):
         self.module = module
+        self.labels = labels
         self.proximity = Proximity(proximity, where)
         self.transport = Transport(transport, norm, where)
 
     def __call__(self, y_pred, y_true):
         if len(y_true.shape) > 1:
             y_pred = y_pred.reshape(y_true.shape[0], -1, y_true.shape[1])
+        else: # Sequential setting
+            print("Jestesmy tutaj? czemu?", y_true.shape)
+            indices = (y_true // self.labels).long()
+            indices = indices.repeat_interleave(self.labels)
+            y_pred = y_pred.reshape(y_true.shape[0], self.labels, -1)
+            y_pred = y_pred.gather(2, indices.view(-1, self.labels, 1)).squeeze()
+            y_true %= self.labels
+
         return (
             torch.nn.functional.cross_entropy(y_pred, y_true)
             + self.proximity(self.module)

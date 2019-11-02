@@ -9,7 +9,7 @@ def headline(epoch: int, train: bool):
     print(f"{headline} | Epoch: {epoch}")
 
 
-def run(loop, gatherer, epoch, checkpointer, train: bool):
+def run(loop, gatherer, epoch, train: bool, checkpointer=None):
     """Run either training or validation loop and print gathered results.
 
     Additionally save model if it's validation is better than current best.
@@ -21,7 +21,7 @@ def run(loop, gatherer, epoch, checkpointer, train: bool):
         "=================================RESULTS======================================"
     )
     nn.metrics.print_results(results)
-    if not train:
+    if not train and checkpointer is not None:
         checkpointer(results["accuracy"])
     print(
         "===================================END========================================"
