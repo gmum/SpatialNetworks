@@ -141,7 +141,7 @@ class Accuracy(TensorboardMean):
             indices = (y_true // self.labels).long()
             indices = indices.repeat_interleave(self.labels)
             y_pred = y_pred.reshape(y_true.shape[0], self.labels, -1)
-            y_pred = y_pred.gather(2, indices.view(-1, 10, 1)).squeeze()
+            y_pred = y_pred.gather(2, indices.view(-1, self.labels, 1)).squeeze()
             y_true %= self.labels
 
         self.score += (y_pred.argmax(dim=1) == y_true).float().sum()

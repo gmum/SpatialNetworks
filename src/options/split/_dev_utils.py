@@ -70,8 +70,7 @@ def get_masks(args, tasks, masker: typing.Callable):
             masker(module) for module in reversed_modules
             if nn.layers.spatial(module)
         ]
-        hidden_masks = list(reversed(reversed_masks[:-1]))  # drop the last mask
-        masks = hidden_masks + [output_mask]
+        masks = list(reversed(reversed_masks)) + [output_mask]
     return masks
 
 
@@ -103,7 +102,7 @@ def generate_networks(args, tasks, masker: typing.Callable):
         layer_idx = 0
         for module in model.modules():
             if nn.layers.spatial(module):
-                print(masks[layer_idx].shape, module)
+                print(layer_idx, module, masks[layer_idx].shape)
                 if layer_idx in args.where:
                     masker.apply(module.weight.data, masks[layer_idx], task)
                 layer_idx += 1

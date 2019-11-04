@@ -111,6 +111,15 @@ def train(subparsers) -> None:
     )
 
     subparser.add_argument(
+        "--regularization",
+        required=False,
+        default=0.0,
+        type=float,
+        help="Weight regularization coefficient.\n "
+        "Default: 0 (no regularization)",
+    )
+
+    subparser.add_argument(
         "--transport",
         required=False,
         default=0.0,
@@ -126,6 +135,13 @@ def train(subparsers) -> None:
         type=str.lower,
         help="Norm used in transport loss. Either L1 or L2. Case insensitive",
         default="l2",
+    )
+
+    subparser.add_argument(
+        "--load",
+        required=False,
+        default=False,
+        help="Path to the model you want to resume training from.",
     )
 
 

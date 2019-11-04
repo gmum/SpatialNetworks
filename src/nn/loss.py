@@ -27,7 +27,7 @@ def get(args, model):
 
     """
     if hasattr(args, "where") and args.where is not None:
-        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.norm, args.where, args.labels)
+        return SpatialCrossEntropyLoss(model, args.proximity, args.transport, args.regularization, args.norm, args.where, args.labels)
     return CustomCrossEntropyLoss()
 
 
@@ -66,11 +66,15 @@ class SpatialCrossEntropyLoss:
 
     """
 
-    def __init__(self, module, proximity, transport, norm, where, labels):
+    def __init__(
+            self, module, proximity, transport, regularization,
+            norm, where, labels
+        ):
         self.module = module
         self.labels = labels
         self.proximity = Proximity(proximity, where)
         self.transport = Transport(transport, norm, where)
+        self.regularization = Regularization(regularization, norm)
 
     def __call__(self, y_pred, y_true):
         if len(y_true.shape) > 1:
@@ -86,8 +90,27 @@ class SpatialCrossEntropyLoss:
             torch.nn.functional.cross_entropy(y_pred, y_true)
             + self.proximity(self.module)
             + self.transport(self.module)
+            + self.regularization(self.module)
         )
 
+@dataclasses.dataclass
+class Regularization:
+    gamma: float
+    norm: str
+
+    def __call__(self, module):
+        reg_penalty = []
+
+        for submodule in module.modules():
+            if hasattr(submodule, "weight"):
+                if self.norm == "l1":
+                    reg_penalty += [torch.sum(torch.abs(submodule.weight))]
+                elif self.norm == "l2":
+                    reg_penalty += [torch.sum(torch.pow(submodule.weight, 2))]
+                else:
+                    raise ValueError
+
+        return self.gamma * torch.stack(reg_penalty).sum()
 
 @dataclasses.dataclass
 class Proximity:

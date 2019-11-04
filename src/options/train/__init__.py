@@ -20,6 +20,9 @@ def run(args):
 
     # Setup appropriate model and data
     model = nn.models.get(args)
+    if args.load:
+        torch.load(args.load)
+
     # Datasets specified by user
     train_datasets = get_datasets(args, train=True)
     validation_datasets = get_datasets(args, train=False)

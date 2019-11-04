@@ -26,4 +26,4 @@ class Masker(_base.Base):
         ).argmax(dim=0)
 
     def apply(self, weight, mask, task) -> None:
-        weight[mask != task, :] *= 0
+        weight[:, mask != task] *= 0
